@@ -3,7 +3,7 @@
 A user-owned clone of Omarchy's Agents bar widget, adding a TeamClaude tab.
 The original Claude, Codex and Fireworks views remain available.
 
-![Agents widget with TeamClaude usage and request activity](screenshots/widget-redacted.png)
+![Agents widget with TeamClaude usage and request activity](preview.png)
 
 ## Use
 
@@ -62,35 +62,53 @@ that the running proxy applied the change, then removes the saved credentials.
 The disabled runtime row remains until restart; the panel reports this.
 In-flight requests are subject to TeamClaude's own behavior.
 
-## Install / restore
+## Requirements
 
-Requires Omarchy's Quickshell Agents widget, Python 3, systemd user services,
-and TeamClaude with `/teamclaude/status` and `/teamclaude/quota` endpoints.
-Developed against the installed TeamClaude 1.1.x source.
+- Omarchy with its Quickshell shell (the stock Agents widget, `omarchy.agents`,
+  is what this plugin extends).
+- Python 3 and systemd user services (both on a stock Omarchy install).
+- [TeamClaude](https://github.com/KarpelesLab/teamclaude) (MIT), the local
+  multi-account proxy this tab controls: `npm install -g @karpeleslab/teamclaude`.
+  It needs the `/teamclaude/status` and `/teamclaude/quota` endpoints; developed
+  against TeamClaude 1.1.x.
+
+## Install
 
 ```sh
-git clone https://github.com/supercleanse/omarchy-teamclaude.git
-cd omarchy-teamclaude
-python3 install.py
+omarchy plugin add https://github.com/supercleanse/omarchy-teamclaude --enable
 ```
 
-The installer uses `omarchy plugin clone omarchy.agents`, installs into
+This adds a second Agents icon. To keep just one, turn off the stock widget:
+
+```sh
+omarchy plugin disable omarchy.agents
+```
+
+## Remove
+
+```sh
+omarchy plugin remove supercleanse.agents
+omarchy plugin enable omarchy.agents
+systemctl --user stop omarchy-teamclaude.service   # only if the widget started the proxy
+rm -rf ~/.local/state/omarchy/teamclaude           # activity log and installer backups
+```
+
+TeamClaude itself, and its accounts and config, are left alone.
+
+## Install from a checkout (alternative)
+
+From a local checkout of this repository, `python3 install.py` installs through
+Omarchy's own clone workflow instead. The installer uses `omarchy plugin clone omarchy.agents`, installs into
 `~/.config/omarchy/plugins/<username>.agents`, and saves a timestamped backup
 under `~/.local/state/omarchy/teamclaude/`. Packaged Omarchy files are untouched.
 The clone is a snapshot of the installed widget; future upstream changes need
 to be incorporated into this source explicitly.
 
-Restore the stock panel with:
+Restore the stock panel after an installer-based install with:
 
 ```sh
 omarchy plugin disable "$USER.agents"
 omarchy plugin enable omarchy.agents
-```
-
-Stop the widget-owned proxy separately if needed:
-
-```sh
-systemctl --user stop omarchy-teamclaude.service
 ```
 
 Troubleshoot startup with `journalctl --user -u omarchy-teamclaude.service`.

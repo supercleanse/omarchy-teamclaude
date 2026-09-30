@@ -58,11 +58,18 @@ class BridgeTests(unittest.TestCase):
     def test_log_tail_is_bounded_and_plain_text(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "activity.log"
-            path.write_text("\n".join(f"line {i}\x00" for i in range(1000)))
-            with patch.object(b, "activity_path", return_value=path):
+            # Request-shaped lines (the console keeps only those), each with a
+            # stray NUL to check it's cleaned out.
+            path.write_text("\n".join(
+                f"12:00:00  a{i:04d} POST /v1/messages (model-x) \u2192 acct\x00 (200, 1.0s)"
+                for i in range(1000)))
+            # Never the real machine's log: no running-server discovery.
+            with patch.object(b, "running_server_log", return_value=(None, "")), \
+                 patch.object(b, "activity_path", return_value=path):
                 result = b.activity()
             self.assertEqual(len(result["lines"]), 200)
-            self.assertEqual(result["lines"][-1], "line 999")
+            self.assertIn("a0999", result["lines"][-1])
+            self.assertNotIn("\x00", result["lines"][-1])
 
     def test_stop_does_not_kill_external_server(self):
         with patch.object(b, "read_config", return_value={}), patch.object(b, "managed", return_value=False):

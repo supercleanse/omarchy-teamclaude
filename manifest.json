@@ -3,9 +3,9 @@
   "id": "supercleanse.agents",
   "name": "Agents + TeamClaude",
   "version": "1.0.0",
-  "author": "Supercleanse",
+  "author": "supercleanse",
   "license": "MIT",
-  "description": "Agents panel with TeamClaude account management, quota meters and live activity.",
+  "description": "Omarchy's Agents panel plus a TeamClaude tab: start and stop the TeamClaude proxy, per-account session and weekly quota meters with prefer, enable and remove controls, and a live request console.",
   "kinds": [
     "bar-widget"
   ],
@@ -86,5 +86,6 @@
   },
   "omarchy": {
     "clonedFrom": "omarchy.agents"
-  }
+  },
+  "homepage": "https://github.com/supercleanse/omarchy-teamclaude"
 }
